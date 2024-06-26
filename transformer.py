@@ -101,8 +101,10 @@ class MultiHeadAttention(nn.Module):
 class PositionWiseFeedForward():
     """
     In the Attention is All You Need paper refer to section 3.3:
-    In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully
-    connected feed-forward network, which is applied to each position separately and identically. This
+    In addition to attention sub-layers, each of the layers in our encoder 
+    and decoder contains a fully
+    connected feed-forward network, which is applied to each 
+    position separately and identically. This
     consists of two linear transformations with a ReLU activation in between.
     FFN(x) = max(0, xW1 + b1)W2 + b2 (2)
 
@@ -153,10 +155,3 @@ class PositionEncoding(nn.Module):
         super(PositionEncoding, self).__init__()
         
         pos_encoding = torch.zeros(max_seq_length, d_model)
-                  
-        
-        
-        
-        
-        
-        

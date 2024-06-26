@@ -135,9 +135,11 @@ class FeedForward(nn.Module):
         self.model_dim = model_dim
         #multiply by 4 because in the paper that's what they did
         self.dim_ff = model_dim * 4
-        self.linear_1 = nn.Linear(model_dim, self.dim_ff)
-        self.linear_2 = nn.Linear(self.dim_ff, model_dim)
-        self.relu     = nn.ReLU()
+        self.linear_1 = nn.Linear(model_dim, self.dim_ff, bias=False)
+        self.linear_2 = nn.Linear(self.dim_ff, model_dim, bias=False)
+        #self.relu     = nn.ReLU()
+        ## Another type 
+        self.relu     = nn.GELU() 
         self.dropout  = nn.Dropout(dropout)
 
     def forward(self, x:torch.Tensor) -> torch.Tensor:
@@ -148,9 +150,6 @@ class FeedForward(nn.Module):
         return output
     
 class EncoderBlock(nn.Module):
-    """
-    This is the e
-    """
     def __init__(self, num_embed:int, num_head:int,
                  dropout:float=0.1) -> None:
         super().__init__()
@@ -200,7 +199,35 @@ class EncoderBlock(nn.Module):
         
         #this is the prenorm method
         x = x + self.multi_head(self.norm1(x))
+        
+        #you can replace this with a multi layer perception
         output = x + self.feedforward(self.norm2(x))
 
         return output
+    
+class DecoderBlock(nn.Module):
+    def __init__(self, num_embed:int, num_head:int,
+                 dropout:float=0.1) -> None:
+        super().__init__()
+        
+        self.num_embed = num_embed
+        self.num_head  = num_head
+        self.dropout   = dropout
+        # if you have num_embedding = 32 and you have 
+        # 4 num_heads your head size will be 8
+        self.head_size = num_embed // num_head
+        
+        self.multi_head = MultiHeadAttention(num_embed=num_embed,
+                                             head_size=num_head ,
+                                             dropout=dropout)
+        
+        self.norm1 = nn.LayerNorm(num_embed)
+        self.feedforward = FeedForward(num_embed, dropout)
+        self.norm2 = nn.LayerNorm(num_embed)
+        
+    def forward(self, x:torch.Tensor) -> torch.Tensor:
+        """
+        """
+        x = x + self.multi_head(self.norm1(x))
+        x = x + self.feedforward(self.norm2(x))
         
